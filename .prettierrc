@@ -1,9 +1,14 @@
 {
   "singleQuote": true,
+  "jsxSingleQuote": true,
+  "trailingComma": "all",
+  "printWidth": 140,
+  "bracketSpacing": true,
+  "tabWidth": 2,
   "semi": true,
   "useTabs": false,
-  "tabWidth": 2,
-  "trailingComma": "all",
-  "printWidth": 80,
-  "jsxSingleQuote": true
+  "arrowParens": "avoid",
+  "endOfLine": "lf",
+  "editor.formatOnSave": true,
+  "prettier.javascriptEnable": ["javascript", "javascriptreact"]
 }
