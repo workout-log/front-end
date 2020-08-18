@@ -6,6 +6,10 @@ workout-log의 프론트엔드 레포지토리 입니다.
 
 - [ ] 코드 정리(20.08.18 ~)
 - - [ ] `./src/components/*`
+- - [ ] `./src/lib/*`
+- - [ ] `./src/modules/*`
+- - [ ] `./src/pages/*`
+- - [ ] `나머지 파일들`
 
 ## workout-log(운동 일지)
 
