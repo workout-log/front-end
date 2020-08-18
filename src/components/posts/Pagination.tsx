@@ -11,6 +11,11 @@ const PaginationBlock = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 3rem;
+  > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
   .disabled {
     background: #dee2e6;
     color: #adb5bd;
@@ -36,7 +41,7 @@ const Pagination: FC<{
   return (
     <PaginationBlock>
       <button
-        type="button"
+        type='button'
         className={`btn ${
           page === 1 || page > lastPage ? 'disabled' : 'btn-dark'
         }`}
@@ -52,7 +57,7 @@ const Pagination: FC<{
       </button>
       <PageNumber>{page}</PageNumber>
       <button
-        type="button"
+        type='button'
         className={`btn ${page >= lastPage ? 'disabled' : 'btn-dark'}`}
         onClick={() => {
           history.push(
