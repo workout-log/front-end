@@ -56,7 +56,7 @@ http://workoutlog.club
 2. Frontend
    - 라이브러리 : React
    - 언어 : HTML5, CSS3, JavaScript
-   - 스타일 : bootstrap, styled-component
+   - 스타일 : bootstrap, reactstrap, styled-component
    - 패키지 관리 : Yarn
    - 통신 : Axios
    - 상태관리 : recoil
