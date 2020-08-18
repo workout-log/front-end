@@ -12,7 +12,7 @@ const App: FC = () => {
         <Route component={WritePage} path='/write' exact />
         <Route component={PostPage} path='/@:username/:postId' exact />
         <Route component={MyPagePage} path='/mypage' exact />
-        <Route component={NoMatch} path='/error' />
+        <Route component={NoMatch} path='/error' exact />
         <Redirect to='/error' />
       </Switch>
     </>
