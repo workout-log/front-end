@@ -43,7 +43,7 @@ module.exports = {
         use: ['style-loader', 'css-loader'], // 오른쪽에서 왼쪽 순서로 실행됨
       },
       {
-        test: /\.(png|jpe?g|gif)$/i,
+        test: /\.(png|jpe?g|gif|ico)$/i,
         use: [
           {
             loader: 'file-loader',
@@ -58,6 +58,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html',
+      favicon: './public/assets/favicon.ico',
     }),
     new Dotenv({
       path:
