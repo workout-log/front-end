@@ -8,7 +8,7 @@ workout-log의 프론트엔드 레포지토리 입니다.
 - - [ ] `./src/components/*`
 - - [ ] `./src/lib/*`
 - - [ ] `./src/modules/*`
-- - [ ] `./src/pages/*`
+- - [x] ~~_`./src/pages/*`(20.08.19)_~~
 - - [x] ~~_`나머지 파일들`(20.08.18)_~~
 
 ## workout-log(운동 일지)
