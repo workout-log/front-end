@@ -1,54 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
-import { RecoilRoot } from 'recoil';
+import * as serviceWorker from './serviceWorker';
 import dotenv from 'dotenv';
-import { useRecoilState } from 'recoil';
+import path from 'path';
 import App from './App';
 import './index.css';
-import * as serviceWorker from './serviceWorker';
-import { userState } from './modules/auth';
-import { check } from './lib/api/auth';
-import path from 'path';
+import { RecoilRoot, useRecoilState } from 'recoil';
+import { userState, checkUser } from './modules/auth';
 
 function LoadUser({ children }) {
-  const [user, setUser] = useRecoilState(userState);
-  const [isRetuenTime, setIsReturnTime] = useState(false);
+  const [, setUser] = useRecoilState(userState);
+  const [isLoaded, setIsLoaded] = useState(false);
   useEffect(() => {
     try {
       const userValue = localStorage.getItem('user');
-      if (!userValue) return setIsReturnTime(true);
+      if (!userValue) return setIsLoaded(true);
       setUser(JSON.parse(userValue));
-      check()
-        .then((res) => {
-          setUser({
-            email: res.data.email,
-            loginType: res.data.loginType,
-            profileImage: res.data.profileImage,
-            username: res.data.username,
-            workoutDays: res.data.workoutDays,
-          });
-        })
-        .catch((err) => {
-          try {
-            localStorage.removeItem('user');
-            setUser({
-              username: '',
-              workoutDays: 0,
-              profileImage: '',
-              email: '',
-              loginType: '',
-            });
-          } catch (e) {
-            console.log('localStorage is not working');
-          }
-        });
+      checkUser(setUser);
     } catch (e) {
       console.log('localStorage is not working');
     }
-    setIsReturnTime(true);
+    setIsLoaded(true);
   }, []);
-  if (isRetuenTime) return children;
+  if (isLoaded) return children;
   return null;
 }
 
