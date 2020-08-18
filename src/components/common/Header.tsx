@@ -2,7 +2,7 @@ import React, { FC, useEffect, useCallback, useState } from 'react';
 import { NavLink, useHistory } from 'react-router-dom';
 import { Nav, Button } from 'reactstrap';
 import styled from 'styled-components';
-import { GoogleAPI, GoogleLogin } from 'react-google-oauth';
+import { GoogleAPI, GoogleLogin, googleGetBasicProfil } from 'react-google-oauth';
 import { useRecoilState } from 'recoil';
 import Marquee from 'react-double-marquee';
 import { userState } from '../../modules/auth';
@@ -59,26 +59,22 @@ const HeaaderWrapper = styled.header`
 
 const MarqueeItem = React.memo<{ user: any }>(({ user }) => (
   <Marquee direction='left'>
-    {user.username}님 안녕하세요.{' '}
-    {user.workoutDays
-      ? `${user.workoutDays}일째 운동중입니다!💪`
-      : '0일째 운동중입니다. 분발하세요!🤬'}
+    {user.username}님 안녕하세요. {user.workoutDays ? `${user.workoutDays}일째 운동중입니다!💪` : '0일째 운동중입니다. 분발하세요!🤬'}
     검색 형식은 닉네임=이우찬 형태로 태그, 이메일 검색 가능합니다!
   </Marquee>
 ));
 
 const Header: FC<{}> = () => {
   const [user, setUser] = useRecoilState(userState);
-  const loginHandler = useCallback((data) => {
-    console.log(data);
-    const { Pt } = data;
+  const loginHandler = useCallback(data => {
+    const { email, name: username, imageUrl: profileImage } = googleGetBasicProfil(data);
     authApi
       .login({
-        username: Pt.Cd,
-        email: Pt.zu,
-        profileImage: Pt.fL,
+        email,
+        username,
+        profileImage,
       })
-      .then((res) => {
+      .then(res => {
         setUser({
           profileImage: res.data.profileImage,
           workoutDays: res.data.workoutDays,
@@ -88,30 +84,27 @@ const Header: FC<{}> = () => {
         });
         headerToggleHandler();
       })
-      .catch((err) => console.log(err));
+      .catch(err => console.log(err));
   }, []);
-  const logoutHandler = useCallback(
-    (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      e.preventDefault();
-      authApi
-        .logout()
-        .then((res) => {
-          localStorage.removeItem('user');
-          setUser({
-            username: '',
-            workoutDays: 0,
-            profileImage: '',
-            email: '',
-            loginType: '',
-          });
-          headerToggleHandler();
-        })
-        .catch((err) => console.log(err));
-    },
-    [],
-  );
+  const logoutHandler = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    e.preventDefault();
+    authApi
+      .logout()
+      .then(res => {
+        localStorage.removeItem('user');
+        setUser({
+          username: '',
+          workoutDays: 0,
+          profileImage: '',
+          email: '',
+          loginType: '',
+        });
+        headerToggleHandler();
+      })
+      .catch(err => console.log(err));
+  }, []);
   const history = useHistory();
-  const onSearch = useCallback((e) => {
+  const onSearch = useCallback(e => {
     e.preventDefault();
     const query = e.target.childNodes[0].value.split('=');
     const queryWord = query[1];
@@ -138,9 +131,7 @@ const Header: FC<{}> = () => {
   const activeStyle = {
     color: '#fff',
   };
-  const dropdownHandler = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
+  const dropdownHandler = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     headerToggleHandler();
   };
@@ -171,11 +162,7 @@ const Header: FC<{}> = () => {
     <>
       <HeaaderWrapper>
         <Nav className='navbar navbar-expand-md navbar-dark fixed-top bg-success'>
-          <NavLink
-            className='navbar-brand'
-            to='/'
-            onClick={() => (window.location.href = '/')}
-          >
+          <NavLink className='navbar-brand' to='/' onClick={() => (window.location.href = '/')}>
             <span className='h3'>workoutLog</span>
           </NavLink>
           <Button
@@ -195,30 +182,17 @@ const Header: FC<{}> = () => {
               {user.username && user.username.length ? (
                 <>
                   <li className='nav-item'>
-                    <NavLink
-                      activeStyle={activeStyle}
-                      className='nav-link'
-                      to='/write'
-                      onClick={headerToggleHandler}
-                    >
+                    <NavLink activeStyle={activeStyle} className='nav-link' to='/write' onClick={headerToggleHandler}>
                       <span className='mb-0'>WRITE</span>
                     </NavLink>
                   </li>
                   <li className='nav-item'>
-                    <NavLink
-                      activeStyle={activeStyle}
-                      className='nav-link'
-                      to='/mypage'
-                      onClick={headerToggleHandler}
-                    >
+                    <NavLink activeStyle={activeStyle} className='nav-link' to='/mypage' onClick={headerToggleHandler}>
                       <span className='mb-0'>MYPAGE</span>
                     </NavLink>
                   </li>
                   <li className='nav-item'>
-                    <LogoutBlock
-                      className='nav-link'
-                      onClickCapture={logoutHandler}
-                    >
+                    <LogoutBlock className='nav-link' onClickCapture={logoutHandler}>
                       <span className='mb-0'>LOGOUT</span>
                     </LogoutBlock>
                   </li>
@@ -238,21 +212,14 @@ const Header: FC<{}> = () => {
                     >
                       LOGIN
                     </button>
-                    <ul
-                      className='dropdown-menu dropdownhover-bottom d-print-inline-block'
-                      role='menu'
-                      aria-labelledby='dropdownMenu1'
-                    >
+                    <ul className='dropdown-menu dropdownhover-bottom d-print-inline-block' role='menu' aria-labelledby='dropdownMenu1'>
                       <li>
                         <GoogleAPI
                           clientId={process.env.GOOGLE_CLIENT_ID}
-                          onUpdateSigninStatus={(res) => console.log(res)}
+                          onUpdateSigninStatus={res => console.log(res)}
                           onInitFailure={(err: any) => console.log(err)}
                         >
-                          <GoogleLogin
-                            onLoginSuccess={loginHandler}
-                            onLoginFailure={(err) => console.log(err)}
-                          />
+                          <GoogleLogin onLoginSuccess={loginHandler} onLoginFailure={err => console.log(err)} />
                         </GoogleAPI>
                       </li>
                     </ul>
@@ -261,16 +228,8 @@ const Header: FC<{}> = () => {
               )}
             </ul>
             <form className='form-inline mt-2 mt-md-0' onSubmit={onSearch}>
-              <input
-                className='form-control mr-sm-2'
-                type='text'
-                placeholder='ex) 닉네임=이우찬'
-                aria-label='Search'
-              />
-              <button
-                className='btn btn-outline-dark my-2 my-sm-0'
-                type='submit'
-              >
+              <input className='form-control mr-sm-2' type='text' placeholder='ex) 닉네임=이우찬' aria-label='Search' />
+              <button className='btn btn-outline-dark my-2 my-sm-0' type='submit'>
                 Search
               </button>
             </form>
