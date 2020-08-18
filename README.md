@@ -5,6 +5,7 @@ workout-log의 프론트엔드 레포지토리 입니다.
 ## To Do
 
 - [ ] 코드 정리(20.08.18 ~)
+- - [ ] `./src/components/*`
 
 ## workout-log(운동 일지)
 
