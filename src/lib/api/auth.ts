@@ -1,7 +1,5 @@
 import client from './client';
 
-export const login = (data: { username: string; email: string; profileImage: string }) => client.post('/api/auth/login', data);
-
 export type UserState = {
   username: string;
   workoutDays: number;
@@ -9,6 +7,10 @@ export type UserState = {
   email: string;
   loginType: string;
 };
+
+export type LoginData = { username: string; email: string; profileImage: string };
+
+export const login = (data: LoginData) => client.post<UserState>('/api/auth/login', data);
 
 export const check = () => client.get<UserState>('/api/auth/check');
 
