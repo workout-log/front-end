@@ -1,13 +1,23 @@
-import React, { FC, useEffect, useCallback, useState } from 'react';
+import React, { FC, useState, useEffect, useCallback } from 'react';
 import { NavLink, useHistory } from 'react-router-dom';
-import { Nav, Button } from 'reactstrap';
-import styled from 'styled-components';
-import { GoogleAPI, GoogleLogin, googleGetBasicProfil } from 'react-google-oauth';
-import { useRecoilState } from 'recoil';
 import Marquee from 'react-double-marquee';
-import { userState } from '../../modules/auth';
-import * as authApi from '../../lib/api/auth';
+import { Nav, Button } from 'reactstrap';
+import { GoogleAPI, GoogleLogin, googleGetBasicProfil } from 'react-google-oauth';
+import styled from 'styled-components';
+import { useRecoilState } from 'recoil';
+import { userState, login, logout } from '../../modules/auth';
+import { UserState } from '../../lib/api/auth';
 import headerToggleHandler from '../../lib/headerToggleHandler';
+
+enum Search {
+  '닉네임' = '/@',
+  '태그' = '/?tag=',
+  '이메일' = '/?email=',
+}
+
+const activeStyle = {
+  color: '#fff',
+};
 
 const Spacer = styled.div`
   height: 61px;
@@ -57,84 +67,53 @@ const HeaaderWrapper = styled.header`
   }
 `;
 
-const MarqueeItem = React.memo<{ user: any }>(({ user }) => (
+type MarqueeItemProps = {
+  user: UserState;
+};
+
+const MarqueeItem = React.memo<MarqueeItemProps>(({ user: { username, workoutDays } }) => (
   <Marquee direction='left'>
-    {user.username}님 안녕하세요. {user.workoutDays ? `${user.workoutDays}일째 운동중입니다!💪` : '0일째 운동중입니다. 분발하세요!🤬'}
+    {username}님 안녕하세요. {workoutDays ? `${workoutDays}일째 운동중입니다!💪` : '0일째 운동중입니다. 분발하세요!🤬'}
     검색 형식은 닉네임=이우찬 형태로 태그, 이메일 검색 가능합니다!
   </Marquee>
 ));
 
-const Header: FC<{}> = () => {
+const Header: FC = () => {
+  const history = useHistory();
+  const [search, setSearch] = useState<string>('');
   const [user, setUser] = useRecoilState(userState);
   const loginHandler = useCallback(data => {
     const { email, name: username, imageUrl: profileImage } = googleGetBasicProfil(data);
-    authApi
-      .login({
+    login(
+      {
         email,
         username,
         profileImage,
-      })
-      .then(res => {
-        setUser({
-          profileImage: res.data.profileImage,
-          workoutDays: res.data.workoutDays,
-          username: res.data.username,
-          email: res.data.email,
-          loginType: res.data.loginType,
-        });
-        headerToggleHandler();
-      })
-      .catch(err => console.log(err));
+      },
+      setUser,
+    );
   }, []);
   const logoutHandler = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.preventDefault();
-    authApi
-      .logout()
-      .then(res => {
-        localStorage.removeItem('user');
-        setUser({
-          username: '',
-          workoutDays: 0,
-          profileImage: '',
-          email: '',
-          loginType: '',
-        });
-        headerToggleHandler();
-      })
-      .catch(err => console.log(err));
+    logout(setUser);
   }, []);
-  const history = useHistory();
-  const onSearch = useCallback(e => {
-    e.preventDefault();
-    const query = e.target.childNodes[0].value.split('=');
-    const queryWord = query[1];
-
-    switch (query[0].toString()) {
-      case '닉네임':
-        // history.push(`/@${queryWord}`);
-        window.location.href = `/@${queryWord}`;
-        headerToggleHandler();
-        break;
-      case '태그':
-        history.push(`/?tag=${queryWord}`);
-        headerToggleHandler();
-        break;
-      case '이메일':
-        history.push(`/?email=${queryWord}`);
-        headerToggleHandler();
-        break;
-      default:
-        alert('검색 형식을 확인해주세요!');
-        break;
-    }
-  }, []);
-  const activeStyle = {
-    color: '#fff',
+  const searchChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const search = e.target.value;
+    setSearch(search);
   };
-  const dropdownHandler = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    e.preventDefault();
-    headerToggleHandler();
-  };
+  const onSearch = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const splitedSearch = search.split('=');
+      const searchKey = splitedSearch[0];
+      const searchWord = splitedSearch[1];
+      const uri = Search[searchKey];
+      if (typeof uri === 'undefined') return alert('검색 형식을 확인해주세요!');
+      history.push(uri + searchWord);
+      headerToggleHandler();
+    },
+    [search],
+  );
   useEffect(() => {
     $('.dropdown').hover(
       function () {
@@ -149,20 +128,11 @@ const Header: FC<{}> = () => {
       },
     );
   }, [user]);
-  useEffect(() => {
-    if (user.username && user.username.length) {
-      try {
-        localStorage.setItem('user', JSON.stringify(user));
-      } catch (e) {
-        console.log('localStorage is not working');
-      }
-    }
-  }, [user]);
   return (
     <>
       <HeaaderWrapper>
         <Nav className='navbar navbar-expand-md navbar-dark fixed-top bg-success'>
-          <NavLink className='navbar-brand' to='/' onClick={() => (window.location.href = '/')}>
+          <NavLink className='navbar-brand' to='/' onClick={() => history.push('/')}>
             <span className='h3'>workoutLog</span>
           </NavLink>
           <Button
@@ -173,13 +143,13 @@ const Header: FC<{}> = () => {
             aria-controls='navbarCollapse'
             aria-expanded={true}
             aria-label='Toggle navigation'
-            onClickCapture={dropdownHandler}
+            onClickCapture={headerToggleHandler}
           >
             <span className='navbar-toggler-icon'></span>
           </Button>
           <div className='navbar-collapse collapse' id='navbarCollapse'>
             <ul className='navbar-nav mr-auto'>
-              {user.username && user.username.length ? (
+              {user.username !== '' ? (
                 <>
                   <li className='nav-item'>
                     <NavLink activeStyle={activeStyle} className='nav-link' to='/write' onClick={headerToggleHandler}>
@@ -228,7 +198,13 @@ const Header: FC<{}> = () => {
               )}
             </ul>
             <form className='form-inline mt-2 mt-md-0' onSubmit={onSearch}>
-              <input className='form-control mr-sm-2' type='text' placeholder='ex) 닉네임=이우찬' aria-label='Search' />
+              <input
+                className='form-control mr-sm-2'
+                type='text'
+                placeholder='ex) 닉네임=이우찬'
+                aria-label='Search'
+                onChange={searchChangeHandler}
+              />
               <button className='btn btn-outline-dark my-2 my-sm-0' type='submit'>
                 Search
               </button>
