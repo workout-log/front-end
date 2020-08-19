@@ -8,7 +8,7 @@ workout-log의 프론트엔드 레포지토리 입니다.
 - - [ ] `./src/components/*`
 - - [ ] `./src/lib/*`
 - - [ ] `./src/modules/*`
-- - [ ] `./src/pages/*`
+- - [x] ~~_`./src/pages/*`(20.08.19)_~~
 - - [x] ~~_`나머지 파일들`(20.08.18)_~~
 
 ## workout-log(운동 일지)
@@ -56,7 +56,7 @@ http://workoutlog.club
 2. Frontend
    - 라이브러리 : React
    - 언어 : HTML5, CSS3, JavaScript
-   - 스타일 : bootstrap, styled-component
+   - 스타일 : bootstrap, reactstrap, styled-component
    - 패키지 관리 : Yarn
    - 통신 : Axios
    - 상태관리 : recoil
