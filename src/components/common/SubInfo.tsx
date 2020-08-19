@@ -1,14 +1,13 @@
 import React, { FC } from 'react';
 import styled, { css } from 'styled-components';
-
 import { Link, useHistory } from 'react-router-dom';
 
-const SubInfoBlock = styled.div<{ hasMarginTop: boolean }>`
-  ${(props) =>
-    props.hasMarginTop &&
-    css`
-      margin-top: 1rem;
-    `}
+type SubInfoBlockProps = {
+  hasMarginTop: boolean;
+};
+
+const SubInfoBlock = styled.div<SubInfoBlockProps>`
+  ${({ hasMarginTop }) => hasMarginTop && 'margin-top: 1rem;'}
   a {
     color: gray !important;
   }
@@ -30,29 +29,23 @@ const SubInfoBlock = styled.div<{ hasMarginTop: boolean }>`
   }
 `;
 
-const SubInfo: FC<{
-  username: string;
-  profileImage: string;
-  publishedDate: Date;
-  hasMarginTop?: boolean;
-}> = ({ username, profileImage, publishedDate, hasMarginTop }) => {
+type SubInfoProps = { username: string; profileImage: string; publishedDate: Date; hasMarginTop?: boolean };
+
+const isGoogleImage = (image: string) => {
+  return image.indexOf(':') !== -1 ? true : false;
+};
+
+const SubInfo: FC<SubInfoProps> = ({ username, profileImage, publishedDate, hasMarginTop }) => {
   const history = useHistory();
   return (
     <SubInfoBlock hasMarginTop={hasMarginTop}>
       <img
-        onClick={() => (window.location.href = `/@${username}`)}
-        src={
-          profileImage.indexOf(':') !== -1
-            ? profileImage
-            : `${process.env.SERVER_URL}/${profileImage}`
-        }
+        onClick={() => history.push(`/@${username}`)}
+        src={isGoogleImage(profileImage) ? profileImage : `${process.env.SERVER_URL}/${profileImage}`}
       />
       <span>
         <b>
-          <Link
-            to={`/@${username}`}
-            onClick={() => (window.location.href = `/@${username}`)}
-          >
+          <Link to={`/@${username}`} onClick={() => history.push(`/@${username}`)}>
             {username}
           </Link>
         </b>
