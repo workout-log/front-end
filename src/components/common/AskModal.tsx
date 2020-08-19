@@ -36,7 +36,7 @@ const AskModalBlock = styled.div`
   }
 `;
 
-const AskModal: FC<{
+type Props = {
   visible: boolean;
   title: string;
   description: string;
@@ -44,15 +44,9 @@ const AskModal: FC<{
   cancelText?: string;
   onConfirm: () => void;
   onCancel: () => void;
-}> = ({
-  visible,
-  title,
-  description,
-  confirmText = '확인',
-  cancelText = '취소',
-  onConfirm,
-  onCancel,
-}) => {
+};
+
+const AskModal: FC<Props> = ({ visible, title, description, confirmText = '확인', cancelText = '취소', onConfirm, onCancel }) => {
   return (
     <>
       {visible && (
@@ -60,11 +54,11 @@ const AskModal: FC<{
           <AskModalBlock>
             <h2>{title}</h2>
             <p>{description}</p>
-            <div className="buttons">
-              <button className="btn btn-danger" onClick={onCancel}>
+            <div className='buttons'>
+              <button className='btn btn-danger' onClick={onCancel}>
                 {cancelText}
               </button>
-              <button className="btn btn-success" onClick={onConfirm}>
+              <button className='btn btn-success' onClick={onConfirm}>
                 {confirmText}
               </button>
             </div>
