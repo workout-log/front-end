@@ -1,4 +1,19 @@
 import client from './client';
+import { UserState } from './auth';
+
+export type CommonComment = {
+  id: number;
+  publishedDate: Date;
+  text: string;
+  isEdited: boolean;
+  user: UserState;
+};
+
+export type Comment = CommonComment & {
+  recomments: CommonComment[];
+};
+
+export type ReComment = CommonComment;
 
 export const writeComment = (id: number, text: string) =>
   client.post(`/api/posts/${id}/comments`, {
@@ -10,7 +25,7 @@ export const writeRecomment = (id: number, commentId: number, text: string) =>
     text,
   });
 
-export const listComments = (id: number) => client.get(`/api/posts/${id}/comments`);
+export const listComments = (id: number) => client.get<Comment[]>(`/api/posts/${id}/comments`);
 
 export const updateComment = (id: number, commentId: number, text: string) =>
   client.patch(`/api/posts/${id}/comments/${commentId}`, { text });
