@@ -17,7 +17,7 @@ export const check = () => client.get<UserState>('/api/auth/check');
 export const logout = () => client.post('/api/auth/logout');
 
 export const update = (formData: FormData) =>
-  client.patch('/api/auth/user', formData, {
+  client.patch<UserState>('/api/auth/user', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 
