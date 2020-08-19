@@ -15,11 +15,15 @@ const TagsBlock = styled.div`
   }
 `;
 
-const Tags: FC<{ tags: string[] }> = ({ tags }) => {
+type Props = {
+  tags: string[];
+};
+
+const Tags: FC<Props> = ({ tags }) => {
   return (
     <TagsBlock>
-      {tags.map((tag) => (
-        <Link className="tag" to={`/?tag=${tag}`} key={tag}>
+      {tags.map(tag => (
+        <Link className='tag' to={`/?tag=${tag}`} key={tag}>
           #{tag}
         </Link>
       ))}
