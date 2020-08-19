@@ -1,11 +1,4 @@
-import isLike from './isLike.png';
-import isNotLike from './isNotLike.png';
-import googleIcon from './googleIcon.png';
-import lockIcon from './lockIcon.png';
-
-export {
-  isLike,
-  isNotLike,
-  googleIcon,
-  lockIcon,
-};
+export { default as isLike } from './isLike.png';
+export { default as isNotLike } from './isNotLike.png';
+export { default as googleIcon } from './googleIcon.png';
+export { default as lockIcon } from './lockIcon.png';
