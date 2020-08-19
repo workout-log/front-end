@@ -12,5 +12,17 @@ export const isGoogleImage = (image: string) => {
 
 export const isLogin = () => {
   const { email } = useRecoilValue(userState);
+  console.log(email);
   return email !== '' ? true : false;
+};
+
+export const useUser = () => {
+  const user = useRecoilValue(userState);
+  const profileImageUrl = isGoogleImage(user.profileImage)
+    ? user.profileImage
+    : `${process.env.SERVER_URL}/${user.profileImage}`;
+  return {
+    ...user,
+    profileImageUrl,
+  };
 };
