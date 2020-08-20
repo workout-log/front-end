@@ -15,7 +15,7 @@ export type Post = {
   body: string;
   files: string[];
   tags: string[];
-  likeUsers: UserState[];
+  likeUsers: string[];
   likes: number;
   comments: Comment[];
   user: UserState;
@@ -24,7 +24,7 @@ export type Post = {
 
 export const readPost = (id: number) => client.get<Post>(`/api/posts/${id}`);
 
-type ListPostsData = { page: number; username: string; email: string; tag: string };
+export type ListPostsData = { page: number; username: string; email: string; tag: string };
 
 export const listPosts = (data: ListPostsData) => {
   const querystring = qs.stringify(data);
