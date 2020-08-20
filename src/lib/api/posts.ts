@@ -32,6 +32,8 @@ export const listPosts = (data: ListPostsData) => {
 };
 
 export const updatePost = (id: number, formData: FormData) =>
-  client.patch(`/api/posts/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  client.patch<Post>(`/api/posts/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 
 export const removePost = (id: number) => client.delete(`/api/posts/${id}`);
