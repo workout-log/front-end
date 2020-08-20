@@ -1,5 +1,6 @@
 import { useRecoilValue } from 'recoil';
 import { userState } from '../../modules/auth';
+import { postState } from '../../modules/editor';
 
 export const headerToggleHandler = () => {
   ($('#navbarCollapse') as any).collapse('toggle');
@@ -23,4 +24,15 @@ export const useUser = () => {
     ...user,
     profileImageUrl,
   };
+};
+
+export const isObject = value => (typeof value === 'object' ? true : false);
+
+export const isLikeAndMine = () => {
+  const { email: userEmail } = useRecoilValue(userState);
+  const { user, likeUsers } = useRecoilValue(postState);
+  if (typeof user === 'undefined') return [false, false];
+  const isLike = likeUsers.findIndex((email: string) => email === userEmail) !== -1 ? true : false;
+  const isMine = !user.email || !userEmail ? false : user.email === userEmail ? true : false;
+  return [isLike, isMine];
 };
