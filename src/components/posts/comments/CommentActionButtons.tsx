@@ -33,7 +33,6 @@ const CommentActionButtons: FC<{
     setModal(false);
   };
   const onConfirm = () => {
-    setModal(false);
     onRemove();
   };
   return (
