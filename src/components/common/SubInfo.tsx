@@ -1,6 +1,8 @@
-import React, { FC } from 'react';
-import styled, { css } from 'styled-components';
-import { Link, useHistory } from 'react-router-dom';
+import React, { FC, useState, useEffect } from 'react';
+import styled from 'styled-components';
+import { Link, useHistory, useLocation } from 'react-router-dom';
+import { isGoogleImage, isExistedImage } from '../../lib/function';
+import Axios from 'axios';
 
 type SubInfoBlockProps = {
   hasMarginTop: boolean;
@@ -29,19 +31,34 @@ const SubInfoBlock = styled.div<SubInfoBlockProps>`
   }
 `;
 
-type SubInfoProps = { username: string; profileImage: string; publishedDate: Date; hasMarginTop?: boolean };
-
-const isGoogleImage = (image: string) => {
-  return image.indexOf(':') !== -1 ? true : false;
+type SubInfoProps = {
+  username: string;
+  profileImage: string;
+  publishedDate: Date;
+  hasMarginTop?: boolean;
 };
 
 const SubInfo: FC<SubInfoProps> = ({ username, profileImage, publishedDate, hasMarginTop }) => {
   const history = useHistory();
+  const location = useLocation();
+  const [isExisted, setIsExisted] = useState(false);
+  useEffect(() => {
+    if (!isGoogleImage(profileImage))
+      isExistedImage(profileImage)
+        .then(() => setIsExisted(true))
+        .catch(() => setIsExisted(false));
+  }, [profileImage]);
   return (
     <SubInfoBlock hasMarginTop={hasMarginTop}>
       <img
         onClick={() => history.push(`/@${username}`)}
-        src={isGoogleImage(profileImage) ? profileImage : `${process.env.SERVER_URL}/${profileImage}`}
+        src={
+          isGoogleImage(profileImage)
+            ? profileImage
+            : isExisted
+            ? `${process.env.SERVER_URL}/${profileImage}`
+            : `${process.env.SERVER_URL}/upload/profileImage/default.png`
+        }
       />
       <span>
         <b>
