@@ -32,18 +32,13 @@ const PostActionButtons: FC<{
     setModal(false);
   };
   const onConfirm = () => {
-    setModal(false);
     onRemove();
   };
   return (
     <>
       <ActionButton onClick={onEdit}>수정</ActionButton>
       <ActionButton onClick={onRemoveClick}>삭제</ActionButton>
-      <AskRemoveModal
-        visible={modal}
-        onConfirm={onConfirm}
-        onCancel={onCancel}
-      />
+      <AskRemoveModal visible={modal} onConfirm={onConfirm} onCancel={onCancel} />
     </>
   );
 };
