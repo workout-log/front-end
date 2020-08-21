@@ -1,50 +1,47 @@
-import React, { FC } from 'react';
+import React, { FC, Dispatch, SetStateAction } from 'react';
 import styled from 'styled-components';
 import CommentItem from './CommentItem';
-import { commentType } from '../../../modules/comments';
+import { CommonComment } from '../../../modules/comments';
 
-const RecommentList: FC<{
+const RecommentBlock = styled.div`
+  margin-left: 1rem;
+`;
+
+type Props = {
+  data: CommonComment[];
   commentId: number;
-  data: commentType[];
-  isRecomment?: boolean;
-  setIsReplyMode?: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsEditMode?: React.Dispatch<React.SetStateAction<boolean>>;
-  isReplyMode?: boolean;
-  isEditMode?: boolean;
-  setCommentId?: React.Dispatch<React.SetStateAction<number>>;
-  setIsRecommentMode?: React.Dispatch<React.SetStateAction<boolean>>;
-  setRecommentId?: React.Dispatch<React.SetStateAction<number>>;
-}> = ({
+  setCommentId: Dispatch<SetStateAction<number>>;
+  setIsReplyMode: Dispatch<SetStateAction<boolean>>;
+  setIsEditMode: Dispatch<SetStateAction<boolean>>;
+  setIsRecomment: Dispatch<SetStateAction<boolean>>;
+  setRecommentId: Dispatch<SetStateAction<number>>;
+};
+
+const RecommentList: FC<Props> = ({
   data,
   commentId,
-  isRecomment,
+  setCommentId,
   setIsReplyMode,
   setIsEditMode,
-  isReplyMode,
-  isEditMode,
-  setCommentId,
-  setIsRecommentMode,
+  setIsRecomment,
   setRecommentId,
 }) => {
   return (
-    <>
-      {data.map((d) => (
+    <RecommentBlock>
+      {data.map(d => (
         <CommentItem
           key={`r_${d.id}`}
           data={d}
-          hasRecomment={false}
           isRecomment={true}
           commentId={commentId}
           setCommentId={setCommentId}
           setRecommentId={setRecommentId}
-          isReplyMode={isReplyMode}
-          isEditMode={isEditMode}
           setIsReplyMode={setIsReplyMode}
           setIsEditMode={setIsEditMode}
-          setIsRecommentMode={setIsRecommentMode}
+          setIsRecomment={setIsRecomment}
         />
       ))}
-    </>
+    </RecommentBlock>
   );
 };
 
