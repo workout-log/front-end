@@ -73,7 +73,6 @@ export const getPost = (
   postsCtrl
     .readPost(id)
     .then(({ data }) => {
-      console.log(data);
       setPost(data);
     })
     .catch(err => {
