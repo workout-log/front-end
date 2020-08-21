@@ -1,12 +1,12 @@
 import React, { FC, useCallback, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useHistory } from 'react-router-dom';
+import { useHistory, Redirect } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { googleIcon } from '../../../public/assets';
-import { userState } from '../../modules/auth';
-import { update, leave } from '../../lib/api/auth';
-import client from '../../lib/api/client';
+import { userState, getProfileImage } from '../../modules/auth';
+import { update, leave } from '../../modules/auth';
 import AskWithDrawModal from './AskWithDrawModal';
+import { useUser, isGoogleImage } from '../../lib/function';
 
 const MyPageWrapper = styled.div`
   .container {
@@ -28,26 +28,41 @@ const MyPageWrapper = styled.div`
     display: flex;
     justify-content: space-between;
   }
+  #profile-block {
+    height: 140px;
+    background-color: rgb(233, 236, 239);
+  }
+  #profile-wrapper {
+    width: 140px;
+  }
 `;
 
-enum loginType {
-  'gmail.com' = googleIcon,
-}
-const MyPage: FC<{}> = () => {
-  const [user, setUser] = useRecoilState(userState);
+const loginImage = {
+  'gmail.com': googleIcon,
+};
+
+const MyPage: FC = () => {
+  const [isChanged, setIsChanged] = useState(false);
+  const [isDefault, setIsDefault] = useState(false);
   const history = useHistory();
+  const { username, workoutDays, profileImage, email, loginType, profileImageUrl } = useUser();
+  const [, setUser] = useRecoilState(userState);
   const [file, setFile] = useState<File>();
-  const [name, setName] = useState(user.username);
+  const [name, setName] = useState(username);
   const [modal, setModal] = useState(false);
-  const onChange = useCallback((e) => {
+
+  const onChange = useCallback(e => {
     setName(e.target.value);
   }, []);
+
   const imageChangeHandler = useCallback(() => {
     const inputEl = document.createElement('input');
     inputEl.setAttribute('type', 'file');
-    inputEl.setAttribute('accept', '.gif, .jpg, .png');
+    inputEl.setAttribute('accept', '.jpeg, .jpeg/jfif, .png, .heif');
     inputEl.click();
     inputEl.onchange = () => {
+      setIsChanged(true);
+      setIsDefault(false);
       const imageDiv = document.querySelector('#profile-block');
       imageDiv.innerHTML = '';
       function readURL(input: any) {
@@ -65,147 +80,104 @@ const MyPage: FC<{}> = () => {
       readURL(inputEl);
     };
   }, []);
+  const changeDefaultImage = () => {
+    const imageDiv = document.querySelector('#profile-block');
+    imageDiv.innerHTML = '';
+    const imgEl = document.createElement('img');
+    imgEl.setAttribute('src', `${process.env.SERVER_URL}/upload/profileImage/default.png`);
+    imageDiv.appendChild(imgEl);
+    setIsDefault(true);
+    setIsChanged(true);
+  };
+
   const onSubmit = useCallback(
-    (e) => {
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       e.preventDefault();
-      const formData = new FormData();
-      formData.set('username', name);
-      formData.set('file', file);
-      update(formData)
-        .then((res) => {
-          setUser(res.data);
-          history.push('/');
-        })
-        .catch((err) => console.log(err.response));
+      const data = new FormData();
+      data.set('username', name);
+      data.set('file', file);
+      data.set('fileChanged', JSON.stringify(isChanged));
+      data.set('isDefaultImage', JSON.stringify(isDefault));
+      update(data, setUser, history);
     },
-    [name, file],
+    [name, file, isChanged, isDefault],
   );
-  useEffect(() => {
-    const dataURLtoFile = (dataurl, fileName) => {
-      var arr = dataurl.split(','),
-        mime = arr[0].match(/:(.*?);/)[1],
-        bstr = atob(arr[1]),
-        n = bstr.length,
-        u8arr = new Uint8Array(n);
 
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-
-      return new File([u8arr], fileName, { type: mime });
-    };
-
-    if (user.profileImage.indexOf(':') === -1)
-      client
-        .get(`/${user.profileImage}`, { responseType: 'blob' })
-        .then(function (response) {
-          var reader = new window.FileReader();
-          reader.readAsDataURL(response.data);
-          reader.onload = function () {
-            var imageDataUrl = reader.result;
-            setFile(dataURLtoFile(imageDataUrl, user.profileImage));
-          };
-        })
-        .catch((err) => console.log(err));
-  }, []);
-  if (!user.email) {
-    history.goBack();
-    return null;
-  }
   const withDrawAccount = useCallback(() => {
-    leave()
-      .then((res) => {
-        setModal(true);
-        setUser({
-          username: '',
-          workoutDays: 0,
-          profileImage: '',
-          email: '',
-          loginType: '',
-        });
-        localStorage.removeItem('user');
-        history.push('/');
-      })
-      .catch((err) => console.log(err));
+    leave(setUser, history);
+  }, []);
+
+  useEffect(() => {
+    if (!isGoogleImage(profileImage)) getProfileImage(profileImage, setFile);
   }, []);
   return (
     <>
       <MyPageWrapper>
-        <div className="container">
-          <div className="row flex-lg-nowrap">
-            <div className="col">
-              <div className="col mb-3">
-                <div className="card">
-                  <div className="card-body">
-                    <div className="e-profile">
-                      <div className="row">
-                        <div className="col-12 col-sm-auto mb-3">
-                          <div className="mx-auto" style={{ width: '140px' }}>
+        <div className='container'>
+          <div className='row flex-lg-nowrap'>
+            <div className='col'>
+              <div className='col mb-3'>
+                <div className='card'>
+                  <div className='card-body'>
+                    <div className='e-profile'>
+                      <div className='row'>
+                        <div className='col-12 col-sm-auto mb-3'>
+                          <div className='mx-auto' id='profile-wrapper'>
                             <div
-                              id="profile-block"
-                              className="d-flex justify-content-center align-items-center rounded"
-                              style={{
-                                height: '140px',
-                                backgroundColor: 'rgb(233, 236, 239)',
-                              }}
+                              id='profile-block'
+                              className='d-flex justify-content-center align-items-center rounded'
                             >
-                              <img
-                                src={
-                                  user.profileImage.indexOf(':') !== -1
-                                    ? user.profileImage
-                                    : `${process.env.SERVER_URL}/${user.profileImage}`
-                                }
-                              />
+                              <img src={profileImageUrl} />
                             </div>
                           </div>
                         </div>
-                        <div className="col d-flex flex-column flex-sm-row justify-content-between mb-3">
-                          <div className="text-center text-sm-left mb-2 mb-sm-0">
-                            <h4 className="pt-sm-2 pb-1 mb-0 text-nowrap">
-                              {user.username}
-                            </h4>
-                            <p className="mb-0">
-                              {user.email}&nbsp;
-                              <img src={loginType[user.loginType]} />
+                        <div className='col d-flex flex-column flex-sm-row justify-content-between mb-3'>
+                          <div className='text-center text-sm-left mb-2 mb-sm-0'>
+                            <h4 className='pt-sm-2 pb-1 mb-0 text-nowrap'>{username}</h4>
+                            <p className='mb-0'>
+                              {email}&nbsp;
+                              <img src={loginImage[loginType]} />
                             </p>
-                            <div className="text-muted"></div>
-                            <div className="mt-2">
+                            <div className='text-muted'></div>
+                            <div className='mt-2'>
                               <button
-                                className="btn btn-success"
-                                type="button"
+                                className='btn btn-success'
+                                type='button'
                                 onClick={imageChangeHandler}
                               >
                                 <span>사진 변경</span>
+                              </button>
+                              <button
+                                className='btn btn-warning ml-2'
+                                type='button'
+                                onClick={changeDefaultImage}
+                              >
+                                <span>기본 이미지</span>
                               </button>
                             </div>
                           </div>
                         </div>
                       </div>
-                      <ul className="nav nav-tabs">
-                        <li className="nav-item active nav-link">
-                          내 정보 수정
-                        </li>
-                        <button
-                          className="btn btn-danger"
-                          onClick={() => setModal(true)}
-                        >
+                      <ul className='nav nav-tabs'>
+                        <li className='nav-item active nav-link'>내 정보 수정</li>
+                        <button className='btn btn-danger' onClick={() => setModal(true)}>
                           회원 탈퇴
                         </button>
                       </ul>
-                      <div className="tab-content pt-3">
-                        <div className="tab-pane active">
-                          <form className="form">
-                            <div className="row">
-                              <div className="col">
-                                <div className="row">
-                                  <div className="col">
-                                    <div className="form-group">
-                                      <label htmlFor="name">이름</label>
+                      <div className='tab-content pt-3'>
+                        <div className='tab-pane active'>
+                          <form className='form'>
+                            <div className='row'>
+                              <div className='col'>
+                                <div className='row'>
+                                  <div className='col'>
+                                    <div className='form-group'>
+                                      <label htmlFor='name'>이름</label>
                                       <input
-                                        id="name"
-                                        className="form-control"
-                                        type="text"
-                                        placeholder="이름"
+                                        id='name'
+                                        className='form-control'
+                                        type='text'
+                                        placeholder='이름'
                                         value={name}
                                         onChange={onChange}
                                       />
@@ -214,12 +186,11 @@ const MyPage: FC<{}> = () => {
                                 </div>
                               </div>
                             </div>
-                            <div className="row">
-                              <div className="col d-flex justify-content-end">
-                                {' '}
+                            <div className='row'>
+                              <div className='col d-flex justify-content-end'>
                                 <button
-                                  className="btn btn-success"
-                                  type="submit"
+                                  className='btn btn-success'
+                                  type='submit'
                                   onClick={onSubmit}
                                 >
                                   저장
