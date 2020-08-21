@@ -1,16 +1,30 @@
 import React, { FC, useEffect } from 'react';
 import qs from 'querystring';
 import styled from 'styled-components';
-import { withRouter, RouteComponentProps, Link } from 'react-router-dom';
+import { useLocation, Link, Redirect } from 'react-router-dom';
 import { useRecoilState } from 'recoil';
 import { SubInfo, Tags } from '../common';
-import { listPosts } from '../../lib/api/posts';
-import { postsState, postType } from '../../modules/posts';
+import { Post } from '../../lib/api/posts';
+import { postsState, getPosts } from '../../modules/posts';
 import Pagination from './Pagination';
 import { lockIcon } from '../../../public/assets';
+import { isObject } from '../../lib/function';
 
 const PostListWrapper = styled.div`
     margin-top 3rem;
+    #images {
+      ::-webkit-scrollbar {
+        width: 100%;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #2C2C2C;
+        border-radius: 0;
+      }
+    }
     embed {
         width: 100%;
         max-height: 31rem;
@@ -58,78 +72,72 @@ const PostItemBlock = styled.div`
   }
 `;
 
-const PostItem: FC<{ post: postType }> = ({ post }) => {
-  const { publishedDate, user, tags, title, body, id, files } = post;
+type PostItemProps = {
+  post: Post;
+};
+
+const PostItem: FC<PostItemProps> = ({
+  post: { publishedDate, user, tags, title, body, id, files, isPrivate },
+}) => {
+  const { username, profileImage } = user;
   return (
     <PostItemBlock>
       <h2>
-        <Link to={user && `/@${user.username}/${id}`}>
-          {post.isPrivate && <img src={lockIcon} />}
+        <Link to={username && `/@${username}/${id}`}>
+          {isPrivate && <img src={lockIcon} />}
           {title}
         </Link>
       </h2>
       <SubInfo
-        username={user && user.username}
-        profileImage={user && user.profileImage}
+        username={username && username}
+        profileImage={profileImage && profileImage}
         publishedDate={publishedDate}
       />
       <Tags tags={tags} />
       <p>{body}</p>
-      <div>
+      <div id='images'>
         {files.length
-          ? (files as any).map((f) => (
-              <embed src={`${process.env.SERVER_URL}/${f}`} key={f} />
-            ))
+          ? files.map(url => <embed src={`${process.env.SERVER_URL}/${url}`} key={url} />)
           : ''}
       </div>
     </PostItemBlock>
   );
 };
 
-const PostList: FC<
-  RouteComponentProps & {
-    location: {
-      search: string;
-    };
-  }
-> = ({ location }) => {
-  const [posts, setPosts] = useRecoilState(postsState);
-  let {
-    tag,
-    username = location.pathname.split('/@')[1],
-    page = 1,
-    useremail,
-  } = qs.parse(location.search.slice(1));
-  tag = tag as string;
-  username = username as string;
-  page = page as string;
+const PostList: FC = () => {
+  const location = useLocation();
+  const [{ posts, lastPage, isLoading }, setPosts] = useRecoilState(postsState);
+  const { tag, page = '1', email } = qs.parse(location.search.slice(1));
+  const numberPage = Number(page) as number;
+  if (isObject(tag) || isObject(page) || isObject(email) || isNaN(numberPage) || numberPage < 1)
+    return <Redirect to='/error' />;
+  let username = location.pathname.split('@')[1];
+  const stringTag = tag as string;
+  const stringEmail = email as string;
   useEffect(() => {
-    listPosts({ tag, username, page, useremail })
-      .then((res) => {
-        setPosts({
-          posts: [...res.data],
-          lastPage: parseInt(res.headers['last-page'], 10),
-        });
-      })
-      .catch((err) => console.log(err));
-  }, [location.search]);
+    const data = {
+      page: numberPage,
+      username,
+      email: stringEmail,
+      tag: stringTag,
+    };
+    getPosts(data, setPosts);
+  }, [location]);
   return (
     <PostListWrapper>
-      <div className="container">
-        <div>
-          {posts.posts.length
-            ? posts.posts.map((post) => <PostItem post={post} key={post.id} />)
-            : ''}
-        </div>
+      <div className='container'>
+        <div>{posts.length ? posts.map(post => <PostItem post={post} key={post.id} />) : ''}</div>
       </div>
       <Pagination
-        page={parseInt(page, 10)}
-        lastPage={posts.lastPage}
+        page={numberPage}
+        lastPage={lastPage}
         username={username}
-        tag={tag}
+        useremail={stringEmail}
+        tag={stringTag}
+        isLoading={isLoading}
       />
     </PostListWrapper>
   );
 };
 
-export default withRouter(PostList);
+export default PostList;
