@@ -1,7 +1,7 @@
-import React, { FC, useState, useCallback, useEffect } from 'react';
+import React, { FC, useState, useCallback } from 'react';
 import styled from 'styled-components';
 import { useRecoilState } from 'recoil';
-import { writeState } from '../../modules/write';
+import { editorState } from '../../modules/editor';
 
 const Tag = styled.div`
   margin-right: 0.5rem;
@@ -47,42 +47,40 @@ const TagList = React.memo<{
   onRemove: (tag: string) => void;
 }>(({ tags, onRemove }) => (
   <TagListBlock>
-    {tags.map((tag) => (
+    {tags.map(tag => (
       <TagItem key={tag} tag={tag} onRemove={onRemove} />
     ))}
   </TagListBlock>
 ));
-const TagBox: FC<{}> = () => {
-  const [post, setPost] = useRecoilState(writeState);
+
+const TagBox: FC = () => {
+  const [{ tags }, setEditor] = useRecoilState(editorState);
   const [input, setInput] = useState('');
-  const [localTags, setLocalTags] = useState([]);
 
   const insertTag = useCallback(
-    (tag) => {
+    tag => {
       if (!tag) return;
-      if (localTags.includes(tag)) return;
-      const nextTags = [...localTags, tag];
-      setLocalTags(nextTags);
-      setPost({ ...post, tags: nextTags });
+      if (tags.includes(tag)) return;
+      const nextTags = [...tags, tag];
+      setEditor(curr => ({ ...curr, tags: nextTags }));
     },
-    [localTags, post],
+    [tags],
   );
 
   const onRemove = useCallback(
     (tag: string) => {
-      const nextTags = localTags.filter((t) => t !== tag);
-      setPost({ ...post, tags: nextTags });
-      setLocalTags(nextTags);
+      const nextTags = tags.filter(t => t !== tag);
+      setEditor(curr => ({ ...curr, tags: nextTags }));
     },
-    [localTags, setPost],
+    [tags],
   );
 
-  const onChange = useCallback((e) => {
+  const onChange = useCallback(e => {
     setInput(e.target.value);
   }, []);
 
   const onSubmit = useCallback(
-    (e) => {
+    (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       insertTag(input.trim());
       setInput('');
@@ -90,29 +88,26 @@ const TagBox: FC<{}> = () => {
     [input, insertTag],
   );
 
-  useEffect(() => {
-    setLocalTags(post.tags);
-  }, [post.tags]);
   return (
     <>
       <TagBoxBlock>
-        <div className="mb-3">
+        <div className='mb-3'>
           <span>태그</span>
-          <form className="d-flex" onSubmit={onSubmit}>
+          <form className='d-flex' onSubmit={onSubmit}>
             <input
-              type="text"
-              className="form-control"
-              name="tag"
-              id="tag"
-              placeholder="태그를 입력해 주세요"
+              type='text'
+              className='form-control'
+              name='tag'
+              id='tag'
+              placeholder='태그를 입력해 주세요'
               value={input}
               onChange={onChange}
             />
-            <button type="submit" className="btn btn-outline-dark my-sm-0">
+            <button type='submit' className='btn btn-outline-dark my-sm-0'>
               추가
             </button>
           </form>
-          <TagList tags={localTags} onRemove={onRemove} />
+          <TagList tags={tags} onRemove={onRemove} />
         </div>
       </TagBoxBlock>
     </>
