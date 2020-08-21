@@ -166,7 +166,7 @@ const PostViewer: FC = () => {
           {isMine && <PostActionButtons onEdit={onEdit} onRemove={onRemove} />}
         </div>
         <div id='files'>
-          {!!!files.length &&
+          {!!files.length &&
             files.map(f => <embed src={`${process.env.SERVER_URL}/${f}`} key={f} />)}
         </div>
         <PostContent dangerouslySetInnerHTML={{ __html: body }} />
