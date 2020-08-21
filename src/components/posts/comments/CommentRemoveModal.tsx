@@ -11,10 +11,8 @@ const CommentRemoveModal: FC<{
     <AskModal
       visible={visible}
       title={`${isRecomment ? '대댓글' : '댓글'} 삭제`}
-      description={`${
-        isRecomment ? '대댓글' : '댓글'
-      }을 정말 삭제하시겠습니까?`}
-      confirmText="삭제"
+      description={`${isRecomment ? '대댓글' : '댓글'}을 정말 삭제하시겠습니까?`}
+      confirmText='삭제'
       onConfirm={onConfirm}
       onCancel={onCancel}
     />
