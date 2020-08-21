@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import { useRecoilState } from 'recoil';
 import { userState, login, logout } from '../../modules/auth';
 import { UserState } from '../../lib/api/auth';
-import headerToggleHandler from '../../lib/headerToggleHandler';
+import { headerToggleHandler } from '../../lib/function';
 
 enum Search {
   '닉네임' = '/@',
@@ -73,7 +73,8 @@ type MarqueeItemProps = {
 
 const MarqueeItem = React.memo<MarqueeItemProps>(({ user: { username, workoutDays } }) => (
   <Marquee direction='left'>
-    {username}님 안녕하세요. {workoutDays ? `${workoutDays}일째 운동중입니다!💪` : '0일째 운동중입니다. 분발하세요!🤬'}
+    {username}님 안녕하세요.{' '}
+    {workoutDays ? `${workoutDays}일째 운동중입니다!💪` : '0일째 운동중입니다. 분발하세요!🤬'}
     검색 형식은 닉네임=이우찬 형태로 태그, 이메일 검색 가능합니다!
   </Marquee>
 ));
@@ -152,12 +153,22 @@ const Header: FC = () => {
               {user.username !== '' ? (
                 <>
                   <li className='nav-item'>
-                    <NavLink activeStyle={activeStyle} className='nav-link' to='/write' onClick={headerToggleHandler}>
+                    <NavLink
+                      activeStyle={activeStyle}
+                      className='nav-link'
+                      to='/write'
+                      onClick={headerToggleHandler}
+                    >
                       <span className='mb-0'>WRITE</span>
                     </NavLink>
                   </li>
                   <li className='nav-item'>
-                    <NavLink activeStyle={activeStyle} className='nav-link' to='/mypage' onClick={headerToggleHandler}>
+                    <NavLink
+                      activeStyle={activeStyle}
+                      className='nav-link'
+                      to='/mypage'
+                      onClick={headerToggleHandler}
+                    >
                       <span className='mb-0'>MYPAGE</span>
                     </NavLink>
                   </li>
@@ -182,14 +193,21 @@ const Header: FC = () => {
                     >
                       LOGIN
                     </button>
-                    <ul className='dropdown-menu dropdownhover-bottom d-print-inline-block' role='menu' aria-labelledby='dropdownMenu1'>
+                    <ul
+                      className='dropdown-menu dropdownhover-bottom d-print-inline-block'
+                      role='menu'
+                      aria-labelledby='dropdownMenu1'
+                    >
                       <li>
                         <GoogleAPI
                           clientId={process.env.GOOGLE_CLIENT_ID}
                           onUpdateSigninStatus={res => console.log(res)}
                           onInitFailure={(err: any) => console.log(err)}
                         >
-                          <GoogleLogin onLoginSuccess={loginHandler} onLoginFailure={err => console.log(err)} />
+                          <GoogleLogin
+                            onLoginSuccess={loginHandler}
+                            onLoginFailure={err => console.log(err)}
+                          />
                         </GoogleAPI>
                       </li>
                     </ul>
