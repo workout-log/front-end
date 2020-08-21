@@ -9,10 +9,7 @@ jobs:
   deploy:
     name: Build, Deploy to S3 bucket
     runs-on: [ubuntu-latest]
-    env:
-      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-      SERVER_URL: ${{ secrets.SERVER_URL }}
-
+    
     strategy:
       matrix:
         node-version: [12.16.x]
@@ -30,6 +27,9 @@ jobs:
 
       - name: Build
         run: yarn build
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          SERVER_URL: ${{ secrets.SERVER_URL }}
 
       - name: Transfer to S3 for serving static
         uses: jakejarvis/s3-sync-action@master
