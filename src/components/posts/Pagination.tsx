@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
 import qs from 'querystring';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory, Redirect } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { postsState } from '../../modules/posts';
 
@@ -25,32 +25,30 @@ const PaginationBlock = styled.div`
 
 const PageNumber = styled.div``;
 
-const buildLink = ({ username, page, tag }) => {
-  const query = qs.stringify({ tag, page });
+const buildLink = ({ username, page, tag, useremail }) => {
+  const query = qs.stringify({ tag, page, useremail });
   return username ? `/@${username}?${query}` : `/?${query}`;
 };
 
-const Pagination: FC<{
+type Props = {
   page: number;
   lastPage: number;
   username: string;
+  useremail: string;
   tag: string;
-}> = ({ page, lastPage, username, tag }) => {
-  if (lastPage === 0) lastPage = 1;
+  isLoading: boolean;
+};
+
+const Pagination: FC<Props> = ({ page, lastPage, username, tag, useremail, isLoading }) => {
+  if (!isLoading && page > lastPage) return <Redirect to='/error' />;
   const history = useHistory();
   return (
     <PaginationBlock>
       <button
         type='button'
-        className={`btn ${
-          page === 1 || page > lastPage ? 'disabled' : 'btn-dark'
-        }`}
+        className={`btn ${page === 1 ? 'disabled' : 'btn-dark'}`}
         onClick={() => {
-          history.push(
-            page === 1 || page > lastPage
-              ? ''
-              : buildLink({ username, tag, page: page - 1 }),
-          );
+          history.push(page === 1 ? '' : buildLink({ useremail, username, tag, page: page - 1 }));
         }}
       >
         이전
@@ -61,9 +59,7 @@ const Pagination: FC<{
         className={`btn ${page >= lastPage ? 'disabled' : 'btn-dark'}`}
         onClick={() => {
           history.push(
-            page >= lastPage
-              ? ''
-              : buildLink({ username, tag, page: page + 1 }),
+            page === lastPage ? '' : buildLink({ useremail, username, tag, page: page + 1 }),
           );
         }}
       >
