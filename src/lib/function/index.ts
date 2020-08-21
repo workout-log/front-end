@@ -1,6 +1,7 @@
 import { useRecoilValue } from 'recoil';
 import { userState } from '../../modules/auth';
 import { postState } from '../../modules/editor';
+import client from '../api/client';
 
 export const headerToggleHandler = () => {
   ($('#navbarCollapse') as any).collapse('toggle');
@@ -35,4 +36,13 @@ export const isLikeAndMine = () => {
   const isLike = likeUsers.findIndex((email: string) => email === userEmail) !== -1 ? true : false;
   const isMine = !user.email || !userEmail ? false : user.email === userEmail ? true : false;
   return [isLike, isMine];
+};
+
+export const isExistedImage = (url: string) => {
+  return new Promise((resolve, reject) =>
+    client
+      .get(url)
+      .then(() => resolve())
+      .catch(() => reject()),
+  );
 };
