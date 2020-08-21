@@ -2,8 +2,7 @@ import React, { FC, useCallback } from 'react';
 import styled from 'styled-components';
 import { useRecoilState } from 'recoil';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { writeState } from '../../modules/write';
-import { writePost, updatePost } from '../../lib/api/posts';
+import { editorState, update, write } from '../../modules/editor';
 import { userState } from '../../modules/auth';
 
 const WriteActionButtonsBlock = styled.div`
@@ -18,65 +17,30 @@ const WriteActionButtonsBlock = styled.div`
 `;
 
 const WriteActionButtons: FC<RouteComponentProps> = ({ history }) => {
-  const [post, setPost] = useRecoilState(writeState);
-  const [user, setUser] = useRecoilState(userState);
+  const [, setUser] = useRecoilState(userState);
+  const [editor, setEditor] = useRecoilState(editorState);
+  const { title, body, tags, files, isPrivate, originalPostId, isEditMode } = editor;
   const onCancel = () => {
     history.goBack();
   };
   const onPublish = useCallback(() => {
-    post.files.set('title', post.title);
-    post.files.set('body', post.body);
-    post.files.set('isPrivate', JSON.stringify(post.isPrivate));
-    if (post.tags.length === 1) {
-      post.files.append('tags', process.env.DUMMY_TAG);
+    files.set('title', title);
+    files.set('body', body);
+    files.set('isPrivate', JSON.stringify(isPrivate));
+    [...new Set(tags)].forEach(t => files.append('tags', t));
+    if (body === '<p><br></p>') return alert('내용은 공백일 수 없습니다.');
+    if (isEditMode) {
+      update(originalPostId, files, history);
+    } else {
+      write(files, history, setUser);
     }
-    [...new Set(post.tags)].forEach((t) => post.files.append('tags', t));
-    if (post.body === '<p><br></p>') return alert('내용은 공백일 수 없습니다.');
-    if (post.isEditMode) {
-      updatePost(post.files, post.originalPostId)
-        .then((res) => {
-          setPost({
-            title: '',
-            body: '',
-            tags: [],
-            files: new FormData(),
-            isPrivate: false,
-            isEditMode: false,
-          });
-          history.push(`/@${res.data.user.username}/${res.data.id}`);
-          console.log(res.data);
-        })
-        .catch((err) => {
-          console.log(err.response);
-          alert('수정하기에 실패하였습니다.');
-        });
-      return;
-    }
-    writePost(post.files)
-      .then((res) => {
-        console.log(res);
-        setPost({
-          title: '',
-          body: '',
-          tags: [],
-          files: new FormData(),
-          isPrivate: false,
-          isEditMode: false,
-        });
-        setUser({ ...res.data.user });
-        history.push(`/@${res.data.user.username}/${res.data.id}`);
-      })
-      .catch((err) => {
-        console.log(err.response.data);
-        alert('글쓰기에 실패하였습니다.');
-      });
-  }, [post]);
+  }, [editor]);
   return (
     <WriteActionButtonsBlock>
-      <button className="btn btn-sm btn-success" onClick={onPublish}>
-        {post.isEditMode ? '포스트 수정' : '포스트 등록'}
+      <button className='btn btn-sm btn-success' onClick={onPublish}>
+        {isEditMode ? '포스트 수정' : '포스트 등록'}
       </button>
-      <button className="btn btn-sm btn-dark" onClick={onCancel}>
+      <button className='btn btn-sm btn-dark' onClick={onCancel}>
         취소
       </button>
     </WriteActionButtonsBlock>
