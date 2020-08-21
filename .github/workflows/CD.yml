@@ -1,5 +1,5 @@
 name: CD - Deploy to Production
-    
+
 on:
   push:
     branches:
@@ -9,7 +9,7 @@ jobs:
   deploy:
     name: Build, Deploy to S3 bucket
     runs-on: [ubuntu-latest]
-    
+
     strategy:
       matrix:
         node-version: [12.16.x]
@@ -26,7 +26,7 @@ jobs:
         run: yarn install
 
       - name: Build
-        run: yarn build
+        run: GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID} SERVER_URL=${SERVER_URL} yarn build
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           SERVER_URL: ${{ secrets.SERVER_URL }}
