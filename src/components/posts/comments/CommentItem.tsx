@@ -1,12 +1,24 @@
-import React, { FC, useCallback, useState, useEffect } from 'react';
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+  Children,
+  useState,
+} from 'react';
 import styled from 'styled-components';
-import RecommentList from './ReCommentList';
 import CommentActionButtons from './CommentActionButtons';
-import { commentType, commentsState } from '../../../modules/comments';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useRecoilValue, useRecoilState } from 'recoil';
-import { userState } from '../../../modules/auth';
-import { deleteRecomment, deleteComment } from '../../../lib/api/comments';
+import { useRecoilState } from 'recoil';
+import {
+  commentsState,
+  Comment,
+  ReComment,
+  removeComment,
+  removeReComment,
+} from '../../../modules/comments';
+import { useUser, isGoogleImage, isExistedImage } from '../../../lib/function';
 
 const CommentItemBlock = styled.li`
   list-style: none;
@@ -139,120 +151,101 @@ const CommentItemBlock = styled.li`
   }
 `;
 
-const RecommentBlock = styled.div`
-  margin-left: 1rem;
-`;
-
-const CommentItem: FC<{
-  data: commentType & {
-    recomments?: commentType[];
-  };
-  hasRecomment?: boolean;
-  isRecomment?: boolean;
-  setIsReplyMode?: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsEditMode?: React.Dispatch<React.SetStateAction<boolean>>;
-  isReplyMode?: boolean;
-  isEditMode?: boolean;
-  commentId?: number;
-  setCommentId?: React.Dispatch<React.SetStateAction<number>>;
-  setIsRecommentMode?: React.Dispatch<React.SetStateAction<boolean>>;
-  setRecommentId?: React.Dispatch<React.SetStateAction<number>>;
-}> = ({
+type Props = {
+  data: Comment | ReComment;
+  commentId: number;
+  setCommentId: Dispatch<SetStateAction<number>>;
+  setRecommentId: React.Dispatch<React.SetStateAction<number>>;
+  setIsRecomment: Dispatch<React.SetStateAction<boolean>>;
+  isRecomment: boolean;
+  setIsEditMode: Dispatch<SetStateAction<boolean>>;
+  setIsReplyMode: Dispatch<SetStateAction<boolean>>;
+  children?: React.ReactNode;
+};
+const CommentItem: FC<Props> = ({
   data,
-  hasRecomment = false,
-  isRecomment = false,
+  commentId,
+  isRecomment,
+  setCommentId,
   setIsEditMode,
   setIsReplyMode,
-  isEditMode,
-  isReplyMode,
-  commentId,
-  setCommentId,
-  setIsRecommentMode,
+  setIsRecomment,
   setRecommentId,
+  children,
 }) => {
-  const [commentsList, setCommentsList] = useRecoilState(commentsState);
-  const user = useRecoilValue(userState);
-  const openRecommentHandler = useCallback(() => {
+  const [, setCommentsList] = useRecoilState(commentsState);
+  const { email } = useUser();
+  const location = useLocation();
+  const postId = Number(location.pathname.split('/')[2]);
+  const history = useHistory();
+  const [isExisted, setIsExisted] = useState(false);
+  const { username, profileImage } = data.user;
+  useEffect(() => {
+    if (!isGoogleImage(profileImage))
+      isExistedImage(profileImage)
+        .then(() => setIsExisted(true))
+        .catch(() => setIsExisted(false));
+  }, [profileImage]);
+
+  const openRecommentHandler = () => {
     ($(`.tab-content > ul > div > .c-${data.id}`) as any).collapse('toggle');
-  }, []);
+  };
+
   const onReplyHandler = useCallback(() => {
     $('textarea').focus();
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
     setIsEditMode(false);
     setIsReplyMode(true);
-    if (isRecomment) setCommentId(commentId);
-    else setCommentId(data.id);
-  }, [data, isRecomment]);
-  const location = useLocation();
-  const postId = location.pathname.split('/')[2];
-  const history = useHistory();
+    setCommentId(commentId);
+  }, [isRecomment]);
+
   const onEdit = useCallback(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    setIsEditMode(true);
+    setIsReplyMode(false);
+    setCommentId(commentId);
     if (isRecomment) {
-      setIsReplyMode(false);
-      setIsEditMode(true);
-      setIsRecommentMode(true);
+      setIsRecomment(true);
       setRecommentId(data.id);
-      setCommentId(commentId);
-    } else {
-      setIsReplyMode(false);
-      setIsEditMode(true);
-      setCommentId(data.id);
     }
-
     $('textarea').focus();
   }, []);
   const onRemove = useCallback(() => {
-    if (isRecomment) {
-      deleteRecomment(postId, commentId, data.id)
-        .then((res) => {
-          console.log(res.data);
-          setCommentsList(res.data.comments);
-        })
-        .catch((err) => console.log(err));
-      return;
-    }
-    deleteComment(postId, data.id)
-      .then((res) => {
-        console.log(res.data);
-        setCommentsList(res.data.comments);
-      })
-      .catch((err) => console.log(err));
-  }, [location, isRecomment]);
+    if (isRecomment) removeReComment(postId, commentId, data.id, setCommentsList);
+    else removeComment(postId, data.id, setCommentsList);
+  }, [postId, commentId]);
+
   useEffect(() => {
     if (
       isRecomment &&
       [...$(`.tab-content > ul > div > .c-${commentId}`)].some(
-        (el) => [...el.classList].indexOf('show') !== -1,
+        el => [...el.classList].indexOf('show') !== -1,
       )
     ) {
-      console.log('shit~_!~_~_#!#!)~#_~!_#~_#');
-      $(`.tab-content > ul > div > .c-1`).addClass('show');
+      $(`.tab-content > ul > div > .c-${commentId}`).addClass('show');
     }
   }, [data]);
   return (
     <>
-      <CommentItemBlock
-        className={isRecomment ? `collapse c-${commentId}` : ''}
-      >
+      <CommentItemBlock className={isRecomment ? `collapse c-${commentId}` : ''}>
         <img
-          className="pull-left media-object img-circle"
-          src={`${
-            data.user.profileImage.indexOf(':')
-              ? `${data.user.profileImage}`
-              : `${process.env.SERVER_URL}/${data.user.profileImage}`
-          }`}
-          alt="profile"
-          onClick={() => history.push(`/@${data.user.username}`)}
+          className='pull-left media-object img-circle'
+          src={
+            isGoogleImage(profileImage)
+              ? profileImage
+              : isExisted
+              ? `${process.env.SERVER_URL}/${profileImage}`
+              : `${process.env.SERVER_URL}/upload/profileImage/default.png`
+          }
+          alt='profile'
+          onClick={() => history.push(`/@${username}`)}
         />
 
-        <div className="media-body">
-          <div className="well well-lg">
-            <h4 className="media-heading text-uppercase reviews">
-              {data.user.username}
-            </h4>
-            <ul className="media-date text-uppercase reviews list-inline">
-              {user.email && user.email === data.user.email ? (
+        <div className='media-body'>
+          <div className='well well-lg'>
+            <h4 className='media-heading text-uppercase reviews'>{username}</h4>
+            <ul className='media-date text-uppercase reviews list-inline'>
+              {email && email === data.user.email ? (
                 <CommentActionButtons
                   isRecomment={isRecomment}
                   onEdit={onEdit}
@@ -262,25 +255,24 @@ const CommentItem: FC<{
                 ''
               )}
               {data.isEdited && `수정됨 • `}
-
               {new Date(data.publishedDate).toLocaleDateString()}
             </ul>
-            <p className="media-comment">{data.text}</p>
+            <p className='media-comment'>{data.text}</p>
             <span
-              className="btn btn-info btn-circle text-uppercase"
-              id="reply"
+              className='btn btn-info btn-circle text-uppercase'
+              id='reply'
               onClick={onReplyHandler}
             >
-              <span className="glyphicon glyphicon-share-alt"></span> Reply
+              <span className='glyphicon glyphicon-share-alt'></span> Reply
             </span>
-            {!isRecomment && data.recomments.length ? (
+            {!isRecomment && (data as Comment).recomments.length ? (
               <span
-                className="btn btn-warning btn-circle text-uppercase"
-                data-toggle="collapse"
-                onClick={hasRecomment ? openRecommentHandler : () => undefined}
+                className='btn btn-warning btn-circle text-uppercase'
+                data-toggle='collapse'
+                onClick={openRecommentHandler}
               >
-                <span className="glyphicon glyphicon-comment"></span>{' '}
-                {data.recomments.length} comments
+                <span className='glyphicon glyphicon-comment'></span>{' '}
+                {(data as Comment).recomments.length} comments
               </span>
             ) : (
               ''
@@ -288,21 +280,7 @@ const CommentItem: FC<{
           </div>
         </div>
       </CommentItemBlock>
-      <RecommentBlock>
-        {hasRecomment && (
-          <RecommentList
-            setCommentId={setCommentId}
-            setRecommentId={setRecommentId}
-            isReplyMode={isReplyMode}
-            isEditMode={isEditMode}
-            setIsReplyMode={setIsReplyMode}
-            setIsEditMode={setIsEditMode}
-            setIsRecommentMode={setIsRecommentMode}
-            commentId={data.id}
-            data={data.recomments}
-          />
-        )}
-      </RecommentBlock>
+      {children}
     </>
   );
 };
