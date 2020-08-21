@@ -124,7 +124,7 @@ const PostViewer: FC = () => {
     } else {
       good(postId, setPost, setLiking);
     }
-  }, [liking]);
+  }, [liking, email]);
 
   useEffect(() => {
     getPost(postId, setPost, setError);
