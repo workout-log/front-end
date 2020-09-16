@@ -13,6 +13,7 @@ import { userState } from '../../modules/auth';
 
 const PostViewerWrapper = styled.div`
   margin-top: 4rem;
+  padding-bottom: 50px;
   #files {
     width: 100%;
     max-height: 31rem;
