@@ -10,7 +10,7 @@ import { getPost, removePost, bad, good } from '../../modules/posts';
 import { isLikeAndMine } from '../../lib/function';
 import { postState, editorState } from '../../modules/editor';
 import { userState } from '../../modules/auth';
-
+ 
 const PostViewerWrapper = styled.div`
   margin-top: 4rem;
   padding-bottom: 50px;
