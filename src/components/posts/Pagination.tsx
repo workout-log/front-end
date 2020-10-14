@@ -59,7 +59,9 @@ const Pagination: FC<Props> = ({ page, lastPage, username, tag, useremail, isLoa
         className={`btn ${page >= lastPage ? 'disabled' : 'btn-dark'}`}
         onClick={() => {
           history.push(
-            page === lastPage ? '' : buildLink({ useremail, username, tag, page: page + 1 }),
+            page === lastPage
+              ? buildLink({ useremail, username, tag, page })
+              : buildLink({ useremail, username, tag, page: page + 1 }),
           );
         }}
       >

@@ -10,9 +10,10 @@ import { getPost, removePost, bad, good } from '../../modules/posts';
 import { isLikeAndMine } from '../../lib/function';
 import { postState, editorState } from '../../modules/editor';
 import { userState } from '../../modules/auth';
-
+ 
 const PostViewerWrapper = styled.div`
   margin-top: 4rem;
+  padding-bottom: 50px;
   #files {
     width: 100%;
     max-height: 31rem;
@@ -124,7 +125,7 @@ const PostViewer: FC = () => {
     } else {
       good(postId, setPost, setLiking);
     }
-  }, [liking]);
+  }, [liking, email]);
 
   useEffect(() => {
     getPost(postId, setPost, setError);
@@ -166,7 +167,7 @@ const PostViewer: FC = () => {
           {isMine && <PostActionButtons onEdit={onEdit} onRemove={onRemove} />}
         </div>
         <div id='files'>
-          {!!!files.length &&
+          {!!files.length &&
             files.map(f => <embed src={`${process.env.SERVER_URL}/${f}`} key={f} />)}
         </div>
         <PostContent dangerouslySetInnerHTML={{ __html: body }} />

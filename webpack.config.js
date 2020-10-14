@@ -66,6 +66,7 @@ module.exports = {
           ? path.resolve(__dirname, './.env.production')
           : path.resolve(__dirname, './.env.development'),
     }),
+    new webpack.EnvironmentPlugin(['GOOGLE_CLIENT_ID', 'SERVER_URL']),
     new webpack.HotModuleReplacementPlugin(),
   ],
   devServer: {
