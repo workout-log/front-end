@@ -6,7 +6,7 @@ import { useRecoilValue } from 'recoil';
 import { postsState } from '../../modules/posts';
 
 const PaginationBlock = styled.div`
-  width: 320px;
+  max-width: 320px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
