@@ -90,6 +90,8 @@ const Header: FC = () => {
         email,
         username,
         profileImage,
+        apiKey: process.env.API_KEY
+        
       },
       setUser,
     );
