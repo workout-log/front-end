@@ -8,7 +8,7 @@ export type UserState = {
   loginType: string;
 };
 
-export type LoginData = { username: string; email: string; profileImage: string };
+export type LoginData = { username: string; email: string; profileImage: string, apiKey: string };
 
 export const login = (data: LoginData) => client.post<UserState>('/api/auth/login', data);
 
