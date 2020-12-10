@@ -26,10 +26,11 @@ jobs:
         run: yarn install
 
       - name: Build
-        run: GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID} SERVER_URL=${SERVER_URL} yarn build
+        run: GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID} SERVER_URL=${SERVER_URL} API_KEY=${API_KEY} yarn build
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           SERVER_URL: ${{ secrets.SERVER_URL }}
+          API_KEY: ${{ secrets.API_KEY }}
 
       - name: Transfer to S3 for serving static
         uses: jakejarvis/s3-sync-action@master
