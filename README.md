@@ -1,24 +1,13 @@
 # front-end
 
 workout-log의 프론트엔드 레포지토리 입니다.
-
-## To Do
-
-- [x] ~~_코드 정리(20.08.18 ~ 20.08.21)_~~
-- - [x] ~~_`./src/components/*`(20.08.21)_~~
-- - [x] ~~_`./src/lib/*`(20.08.21)_~~
-- - [x] ~~_`./src/modules/*`(20.08.21)_~~
-- - [x] ~~_`./src/pages/*`(20.08.19)_~~
-- - [x] ~~_`나머지 파일들`(20.08.18)_~~
-- [x] ~~_aws S3 배포(20.08.21)_~~
-- [x] ~~_CD(20.08.21)_~~
-- [x] ~~_aws route53(20.08.21)_~~
-
+ 
 ## workout-log(운동 일지)
 
-[웹사이트](http://workoutlog.club)
-http://workoutlog.club
-
+[~~웹사이트~~](http://workoutlog.club)
+~~http://workoutlog.club~~
+2021.01.31 이후 deploy 종료
+ 
 #### 목차
 
 1. [개요](#개요)
@@ -55,11 +44,11 @@ http://workoutlog.club
    - 언어 : JavaScript(Node.js, koa)
    - 배포 환경 : Amazon Web Service EC2, docker, dockhub
    - 데이터베이스 : mongodb
-   - 인증 : JWT
+   - 인증 : Cookie + JWT
 2. Frontend
    - 라이브러리 : React
    - 언어 : HTML5, CSS3, JavaScript
-   - 스타일 : bootstrap, reactstrap, styled-component
+   - 스타일 : bootstrap, styled-component
    - 패키지 관리 : Yarn
    - 통신 : Axios
    - 상태관리 : recoil
@@ -82,7 +71,7 @@ http://workoutlog.club
 - 이메일
 
 #### 타임라인
-
+ 
 - 페이지네이션 형식(스크롤 당 10개씩)
   - 전체 사용자의 게시물 최근 순으로
   - 자신의 게시물 삭제 가능
@@ -105,3 +94,35 @@ http://workoutlog.club
 - 로그아웃
 - 회원탈퇴
 - 사용자 닉네임, 이미지 수정
+
+## 스크린샷
+
+### 메인
+
+![메인](./_README/1.png)
+
+### 게시글
+
+![게시글](./_README/2.png)
+
+### 글쓰기
+
+![글쓰기](./_README/3.png)
+
+### 마이페이지
+
+![마이페이지](./_README/4.png)
+
+## Todo
+
+기능 개발 끝 - (20.07.26 끝)
+
+- [x] ~~_코드 정리(20.08.18 ~ 20.08.21)_~~
+- - [x] ~~_`./src/components/*`(20.08.21)_~~
+- - [x] ~~_`./src/lib/*`(20.08.21)_~~
+- - [x] ~~_`./src/modules/*`(20.08.21)_~~
+- - [x] ~~_`./src/pages/*`(20.08.19)_~~
+- - [x] ~~_`나머지 파일들`(20.08.18)_~~
+- [x] ~~_aws S3 배포(20.08.21)_~~
+- [x] ~~_CD(20.08.21)_~~
+- [x] ~~_aws route53(20.08.21)_~~
